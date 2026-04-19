@@ -2,10 +2,6 @@ package com.empresa.rest;
 
 
 import java.util.List;
-import jakarta.ws.rs.QueryParam;
-import jakarta.ws.rs.DefaultValue;
-import jakarta.ws.rs.core.Context;
-import jakarta.ws.rs.core.SecurityContext;
 
 import org.jboss.logging.Logger;
 
@@ -17,15 +13,18 @@ import com.empresa.service.SolicitacaoService;
 
 import jakarta.inject.Inject;
 import jakarta.ws.rs.Consumes;
-import jakarta.ws.rs.DELETE;
+import jakarta.ws.rs.DefaultValue;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.PUT;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.QueryParam;
+import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.SecurityContext;
 
 @Path("/solicitacoes")
 @Produces(MediaType.APPLICATION_JSON)
@@ -81,13 +80,32 @@ public class SolicitacaoResource {
 		return null;
 	}
 
-
     @GET
-    @Path("/{id}")
-    public Response buscarPorId(@PathParam("id") Long id) {
+    @Path("/demandante/{id}")
+    public Response buscarPorIdDemandante(@PathParam("id") Long id) {
+        validateSecurityContext();
+        String email = securityContext.getUserPrincipal().getName();
         Solicitacao s = solicitacaoService.buscarPorId(id);
         if (s == null) {
             return Response.status(Response.Status.NOT_FOUND).build();
+        }
+        if (s.usuarioAtribuido == null || !email.equals(s.usuarioAtribuido.email)) {
+            return Response.status(Response.Status.FORBIDDEN).entity("Acesso negado à solicitação para demandante").build();
+        }
+        return Response.ok(SolicitacaoMapper.toDTO(s)).build();
+    }
+
+    @GET
+    @Path("/atendente/{id}")
+    public Response buscarPorIdAtendente(@PathParam("id") Long id) {
+        validateSecurityContext();
+        String email = securityContext.getUserPrincipal().getName();
+        Solicitacao s = solicitacaoService.buscarPorId(id);
+        if (s == null) {
+            return Response.status(Response.Status.NOT_FOUND).build();
+        }
+        if (s.usuarioAtendente == null || !email.equals(s.usuarioAtendente.email)) {
+            return Response.status(Response.Status.FORBIDDEN).entity("Acesso negado à solicitação para atendente").build();
         }
         return Response.ok(SolicitacaoMapper.toDTO(s)).build();
     }
@@ -103,31 +121,53 @@ public class SolicitacaoResource {
         }
     }
 
-
     @PUT
-    @Path("/{id}")
-    public Response atualizar(@PathParam("id") Long id, Solicitacao dados) {
-        SolicitacaoDTO solicitacao = solicitacaoService.atualizar(id, dados);
-        if (solicitacao == null) {
+    @Path("/demandante/{id}")
+    public Response atualizarDemandante(@PathParam("id") Long id, Solicitacao dados) {
+        validateSecurityContext();
+        String email = securityContext.getUserPrincipal().getName();
+        Solicitacao s = solicitacaoService.buscarPorId(id);
+        if (s == null) {
             LOG.warnf("Solicitação id %d não encontrada para atualização", id);
             return Response.status(Response.Status.NOT_FOUND).build();
         }
+        if (s.usuarioAtribuido == null || !email.equals(s.usuarioAtribuido.email)) {
+            return Response.status(Response.Status.FORBIDDEN).entity("Acesso negado à atualização para demandante").build();
+        }
+        SolicitacaoDTO solicitacao = solicitacaoService.atualizar(id, dados);
+        return Response.ok(solicitacao).build();
+    }
+
+    @PUT
+    @Path("/atendente/{id}")
+    public Response atualizarAtendente(@PathParam("id") Long id, Solicitacao dados) {
+        validateSecurityContext();
+        String email = securityContext.getUserPrincipal().getName();
+        Solicitacao s = solicitacaoService.buscarPorId(id);
+        if (s == null) {
+            LOG.warnf("Solicitação id %d não encontrada para atualização", id);
+            return Response.status(Response.Status.NOT_FOUND).build();
+        }
+        if (s.usuarioAtendente == null || !email.equals(s.usuarioAtendente.email)) {
+            return Response.status(Response.Status.FORBIDDEN).entity("Acesso negado à atualização para atendente").build();
+        }
+        SolicitacaoDTO solicitacao = solicitacaoService.atualizar(id, dados);
         return Response.ok(solicitacao).build();
     }
 
 
-    @DELETE
-    @Path("/{id}")
-    public Response deletar(@PathParam("id") Long id) {
-        boolean deleted = solicitacaoService.deletar(id);
-        if (deleted) {
-            LOG.infof("Solicitação id %d deletada", id);
-            return Response.noContent().build();
-        } else {
-            LOG.warnf("Solicitação id %d não encontrada para deleção", id);
-            return Response.status(Response.Status.NOT_FOUND).build();
-        }
-    }
+    // @DELETE
+    // @Path("/{id}")
+    // public Response deletar(@PathParam("id") Long id) {
+    //     boolean deleted = solicitacaoService.deletar(id);
+    //     if (deleted) {
+    //         LOG.infof("Solicitação id %d deletada", id);
+    //         return Response.noContent().build();
+    //     } else {
+    //         LOG.warnf("Solicitação id %d não encontrada para deleção", id);
+    //         return Response.status(Response.Status.NOT_FOUND).build();
+    //     }
+    // }
 
 
 }
