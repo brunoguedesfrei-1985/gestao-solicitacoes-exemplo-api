@@ -1,0 +1,67 @@
+package com.empresa.service;
+
+import java.util.List;
+
+import org.jboss.logging.Logger;
+
+import com.empresa.dao.SolicitacaoDAO;
+import com.empresa.dao.UsuarioDAO;
+import com.empresa.domain.SolicitacaoRequest;
+import com.empresa.dto.SolicitacaoDTO;
+import com.empresa.mapper.SolicitacaoMapper;
+import com.empresa.model.Solicitacao;
+
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import jakarta.transaction.Transactional;
+
+@ApplicationScoped
+public class SolicitacaoService {
+    
+    private static final Logger LOG = Logger.getLogger(SolicitacaoService.class);
+    
+    @Inject
+    UsuarioDAO usuarioDAO;
+    
+    @Inject
+    SolicitacaoDAO solicitacaoDAO;
+
+    public List<Solicitacao> listarTodas() {
+        LOG.info("Listando todas as solicitações");
+        return solicitacaoDAO.listarTodas();
+    }
+
+    public Solicitacao buscarPorId(Long id) {
+        LOG.debugf("Buscando solicitação por id %d", id);
+        return solicitacaoDAO.buscarPorId(id);
+    }
+
+    @Transactional
+    public SolicitacaoDTO criar(SolicitacaoRequest req) {
+        LOG.infof("Criando solicitação: %s", req.titulo);
+        Solicitacao solicitacao = new Solicitacao();
+        solicitacao.titulo = req.titulo;
+        solicitacao.descricao = req.descricao;
+        solicitacao.categoria = req.categoria;
+        solicitacao.status = req.status;
+        if (req.usuarioAtribuidoId != null) {
+            solicitacao.usuarioAtribuido = usuarioDAO.buscarPorId(req.usuarioAtribuidoId);
+        }
+        if (req.usuarioAtendenteId != null) {
+            solicitacao.usuarioAtendente = usuarioDAO.buscarPorId(req.usuarioAtendenteId);
+        }
+        return SolicitacaoMapper.toDTO(solicitacaoDAO.criar(solicitacao));
+    }
+
+    @Transactional
+    public SolicitacaoDTO atualizar(Long id, Solicitacao dados) {
+        LOG.infof("Atualizando solicitação id %d", id);
+        return SolicitacaoMapper.toDTO(solicitacaoDAO.atualizar(id, dados));
+    }
+
+    @Transactional
+    public boolean deletar(Long id) {
+        LOG.infof("Deletando solicitação id %d", id);
+        return solicitacaoDAO.deletar(id);
+    }
+}
