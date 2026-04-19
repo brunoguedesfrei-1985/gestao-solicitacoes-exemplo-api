@@ -6,6 +6,26 @@ import java.util.List;
 
 @ApplicationScoped
 public class SolicitacaoDAO {
+	
+	public long countPorUsuarioDemandante(String email) {
+        return Solicitacao.count("usuarioAtribuido.email", email);
+    }
+	
+	public long countPorUsuarioAtendente(String email) {
+        return Solicitacao.count("usuarioAtendente.email", email);
+    }
+
+    public List<Solicitacao> listarTodasPorUsuario(String email, int page, int size) {
+        return Solicitacao.find("usuarioAtribuido.email", email)
+                .page(page, size)
+                .list();
+    }
+
+    public List<Solicitacao> listarTodasPorUsuarioAtendente(String email, int page, int size) {
+        return Solicitacao.find("usuarioAtendente.email", email)
+        		.page(page, size)
+                .list();
+    }
 
     public List<Solicitacao> listarTodas() {
         return Solicitacao.listAll();

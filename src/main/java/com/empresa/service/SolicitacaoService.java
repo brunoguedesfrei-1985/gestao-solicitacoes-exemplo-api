@@ -17,6 +17,7 @@ import jakarta.transaction.Transactional;
 
 @ApplicationScoped
 public class SolicitacaoService {
+
     
     private static final Logger LOG = Logger.getLogger(SolicitacaoService.class);
     
@@ -25,6 +26,22 @@ public class SolicitacaoService {
     
     @Inject
     SolicitacaoDAO solicitacaoDAO;
+    
+    public long countPorUsuarioDemandante(String email) {
+        return solicitacaoDAO.countPorUsuarioDemandante(email);
+    }
+    
+    public long countPorUsuarioAtendente(String email) {
+    	return solicitacaoDAO.countPorUsuarioAtendente(email);
+    }
+
+    public List<Solicitacao> listarTodasPorUsuario(String email, int page, int size) {
+        return solicitacaoDAO.listarTodasPorUsuario(email, page, size);
+    }
+
+    public List<Solicitacao> listarTodasPorUsuarioAtendente(String email, int page, int size) {
+    	return solicitacaoDAO.listarTodasPorUsuarioAtendente(email, page, size);
+    }
 
     public List<Solicitacao> listarTodas() {
         LOG.info("Listando todas as solicitações");

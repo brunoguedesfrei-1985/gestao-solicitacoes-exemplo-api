@@ -1,6 +1,11 @@
 package com.empresa.rest;
 
+
 import java.util.List;
+import jakarta.ws.rs.QueryParam;
+import jakarta.ws.rs.DefaultValue;
+import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.SecurityContext;
 
 import org.jboss.logging.Logger;
 
@@ -27,18 +32,54 @@ import jakarta.ws.rs.core.Response;
 @Consumes(MediaType.APPLICATION_JSON)
 public class SolicitacaoResource {
 
-    @Inject
+	private static final Logger LOG = Logger.getLogger(SolicitacaoResource.class);
+
+	@Inject
     SolicitacaoService solicitacaoService;
 
-    private static final Logger LOG = Logger.getLogger(SolicitacaoResource.class);
-
+    @Context
+    SecurityContext securityContext;
 
     @GET
-    public Response listarTodas() {
-        List<Solicitacao> lista = solicitacaoService.listarTodas();
+    @Path("/todas/demandante")
+    public Response listarTodas(
+        @QueryParam("page") @DefaultValue("0") int page,
+        @QueryParam("size") @DefaultValue("10") int size
+    ) {
+        validateSecurityContext();
+        String email = securityContext.getUserPrincipal().getName();
+        long total = solicitacaoService.countPorUsuarioDemandante(email);
+        List<Solicitacao> lista = solicitacaoService.listarTodasPorUsuario(email, page, size);
         List<SolicitacaoDTO> dtos = lista.stream().map(SolicitacaoMapper::toDTO).toList();
-        return Response.ok(dtos).build();
+        java.util.Map<String, Object> response = new java.util.HashMap<>();
+        response.put("total", total);
+        response.put("items", dtos);
+        return Response.ok(response).build();
     }
+    
+    @GET
+    @Path("/todas/atendente")
+    public Response listarTodasUsuarioAtendente(
+            @QueryParam("page") @DefaultValue("0") int page,
+            @QueryParam("size") @DefaultValue("10") int size
+        ) {
+        validateSecurityContext();
+        String email = securityContext.getUserPrincipal().getName();
+        long total = solicitacaoService.countPorUsuarioAtendente(email);
+        List<Solicitacao> lista = solicitacaoService.listarTodasPorUsuarioAtendente(email, page, size);
+        List<SolicitacaoDTO> dtos = lista.stream().map(SolicitacaoMapper::toDTO).toList();
+        java.util.Map<String, Object> response = new java.util.HashMap<>();
+        response.put("total", total);
+        response.put("items", dtos);
+        return Response.ok(response).build();
+    }
+
+	private Response validateSecurityContext() {
+		if (securityContext.getUserPrincipal() == null) {
+            return Response.status(Response.Status.UNAUTHORIZED).entity("Usuário não autenticado").build();
+        }
+		return null;
+	}
 
 
     @GET
