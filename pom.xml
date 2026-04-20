@@ -27,6 +27,16 @@
 	</dependencyManagement>
   
   <dependencies>
+	<!-- health check -->
+  	<dependency>
+	  <groupId>io.quarkus</groupId>
+	  <artifactId>quarkus-smallrye-health</artifactId>
+	</dependency>
+	<!-- metricas -->
+	<dependency>
+	  <groupId>io.quarkus</groupId>
+	  <artifactId>quarkus-smallrye-metrics</artifactId>
+	</dependency>
     <dependency>
       <groupId>com.auth0</groupId>
       <artifactId>java-jwt</artifactId>

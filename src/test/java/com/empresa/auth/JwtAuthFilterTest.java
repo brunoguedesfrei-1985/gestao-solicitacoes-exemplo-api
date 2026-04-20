@@ -26,6 +26,16 @@ class JwtAuthFilterTest {
         filter.filter(ctx);
         verify(ctx, never()).abortWith(any());
     }
+    
+    @Test
+    void devePermitirAcessoPublicoHealth() {
+    	JwtAuthFilter filter = new JwtAuthFilter();
+    	ContainerRequestContext ctx = mock(ContainerRequestContext.class);
+    	when(ctx.getUriInfo()).thenReturn(mock(jakarta.ws.rs.core.UriInfo.class));
+    	when(ctx.getUriInfo().getPath()).thenReturn("/health/qualquer");
+    	filter.filter(ctx);
+    	verify(ctx, never()).abortWith(any());
+    }
 
     @Test
     void deveAbortarSemHeaderAuthorization() {

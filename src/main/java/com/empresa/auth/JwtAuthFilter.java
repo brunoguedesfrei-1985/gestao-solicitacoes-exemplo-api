@@ -18,7 +18,7 @@ public class JwtAuthFilter implements ContainerRequestFilter {
     public void filter(ContainerRequestContext requestContext) {
         String path = requestContext.getUriInfo().getPath();
         // Permitir acesso público a qualquer endpoint que comece com /public
-        if (path.startsWith("/public")) {
+        if (path.startsWith("/public") || path.startsWith("/health")) {
             return;
         }
         String authHeader = requestContext.getHeaderString("Authorization");

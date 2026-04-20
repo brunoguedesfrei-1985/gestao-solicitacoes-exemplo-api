@@ -17,6 +17,8 @@ class CargoDAOTest {
     @BeforeEach
     @Transactional
     void setup() {
+        // Limpa usuários antes para evitar violação de FK
+        com.empresa.model.Usuario.deleteAll();
         Cargo.deleteAll();
     }
 

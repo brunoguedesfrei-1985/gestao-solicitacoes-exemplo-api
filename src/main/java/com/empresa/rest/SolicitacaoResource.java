@@ -3,6 +3,7 @@ package com.empresa.rest;
 
 import java.util.List;
 
+import org.eclipse.microprofile.metrics.annotation.Counted;
 import org.jboss.logging.Logger;
 
 import com.empresa.domain.SolicitacaoRequest;
@@ -44,6 +45,7 @@ public class SolicitacaoResource {
 
     @GET
     @Path("/todas/demandante")
+    @Counted(name = "solicitacoes_listar_todas_demandante_count", description = "Contador de chamadas ao endpoint de listagem de solicitações por demandante")
     public Response listarTodas(
         @QueryParam("page") @DefaultValue("0") int page,
         @QueryParam("size") @DefaultValue("10") int size
@@ -61,6 +63,7 @@ public class SolicitacaoResource {
     
     @GET
     @Path("/todas/atendente")
+    @Counted(name = "solicitacoes_listar_todas_atendente_count", description = "Contador de chamadas ao endpoint de listagem de solicitações por atendente")
     public Response listarTodasUsuarioAtendente(
             @QueryParam("page") @DefaultValue("0") int page,
             @QueryParam("size") @DefaultValue("10") int size
