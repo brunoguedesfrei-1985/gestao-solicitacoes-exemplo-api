@@ -32,9 +32,9 @@ CREATE TABLE IF NOT EXISTS solicitacao (
     usuario_atendente_id INTEGER REFERENCES usuario(id)
 );
 
-INSERT INTO cargo (nome) VALUES ('gerente') ON CONFLICT DO NOTHING;
-INSERT INTO cargo (nome) VALUES ('analista') ON CONFLICT DO NOTHING;
-INSERT INTO cargo (nome) VALUES ('tecnico') ON CONFLICT DO NOTHING;
+INSERT INTO cargo (id, nome) VALUES (1, 'gerente') ON CONFLICT DO NOTHING;
+INSERT INTO cargo (id, nome) VALUES (2, 'analista') ON CONFLICT DO NOTHING;
+INSERT INTO cargo (id, nome) VALUES (3, 'tecnico') ON CONFLICT DO NOTHING;
 
 INSERT INTO usuario
 (id, cpf, nome, email, senha, cargo_id)
