@@ -13,6 +13,7 @@ import org.eclipse.microprofile.openapi.annotations.parameters.RequestBody;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponses;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
+import org.eclipse.microprofile.openapi.annotations.security.SecurityRequirement;
 import org.jboss.logging.Logger;
 
 import com.empresa.domain.SolicitacaoRequest;
@@ -57,6 +58,7 @@ public class SolicitacaoResource {
     @Path("/todas/demandante")
     @Counted(name = "solicitacoes_listar_todas_demandante_count", description = "Contador de chamadas ao endpoint de listagem de solicitações por demandante")
     @Operation(summary = "Listar solicitações do demandante logado", description = "Retorna todas as solicitações do usuário demandante logado, paginadas.")
+    @SecurityRequirement(name = "jwt")
     @APIResponses(value = {
         @APIResponse(responseCode = "200", description = "Lista de solicitações retornada com sucesso",
             content = @Content(mediaType = "application/json")),
@@ -82,6 +84,7 @@ public class SolicitacaoResource {
     @Path("/todas/atendente")
     @Counted(name = "solicitacoes_listar_todas_atendente_count", description = "Contador de chamadas ao endpoint de listagem de solicitações por atendente")
     @Operation(summary = "Listar solicitações do atendente logado", description = "Retorna todas as solicitações do usuário atendente logado, paginadas.")
+    @SecurityRequirement(name = "jwt")
     @APIResponses(value = {
         @APIResponse(responseCode = "200", description = "Lista de solicitações retornada com sucesso",
             content = @Content(mediaType = "application/json")),
@@ -113,6 +116,7 @@ public class SolicitacaoResource {
     @GET
     @Path("/demandante/{id}")
     @Operation(summary = "Buscar solicitação por id (demandante)", description = "Busca uma solicitação pelo id para o usuário demandante logado.")
+    @SecurityRequirement(name = "jwt")
     @APIResponses(value = {
         @APIResponse(responseCode = "200", description = "Solicitação encontrada",
             content = @Content(mediaType = "application/json", schema = @Schema(implementation = com.empresa.dto.SolicitacaoDTO.class))),
@@ -136,6 +140,7 @@ public class SolicitacaoResource {
     @GET
     @Path("/atendente/{id}")
     @Operation(summary = "Buscar solicitação por id (atendente)", description = "Busca uma solicitação pelo id para o usuário atendente logado.")
+    @SecurityRequirement(name = "jwt")
     @APIResponses(value = {
         @APIResponse(responseCode = "200", description = "Solicitação encontrada",
             content = @Content(mediaType = "application/json", schema = @Schema(implementation = com.empresa.dto.SolicitacaoDTO.class))),
@@ -158,6 +163,7 @@ public class SolicitacaoResource {
 
     @POST
     @Operation(summary = "Criar nova solicitação", description = "Cria uma nova solicitação.")
+    @SecurityRequirement(name = "jwt")
     @APIResponses(value = {
         @APIResponse(responseCode = "201", description = "Solicitação criada",
             content = @Content(mediaType = "application/json", schema = @Schema(implementation = com.empresa.dto.SolicitacaoDTO.class))),
@@ -186,6 +192,7 @@ public class SolicitacaoResource {
     @PUT
     @Path("/demandante/{id}")
     @Operation(summary = "Atualizar solicitação (demandante)", description = "Atualiza uma solicitação como demandante.")
+    @SecurityRequirement(name = "jwt")
     @APIResponses(value = {
         @APIResponse(responseCode = "200", description = "Solicitação atualizada",
             content = @Content(mediaType = "application/json", schema = @Schema(implementation = com.empresa.dto.SolicitacaoDTO.class))),
@@ -221,6 +228,7 @@ public class SolicitacaoResource {
     @PUT
     @Path("/atendente/{id}")
     @Operation(summary = "Atualizar solicitação (atendente)", description = "Atualiza uma solicitação como atendente.")
+    @SecurityRequirement(name = "jwt")
     @APIResponses(value = {
         @APIResponse(responseCode = "200", description = "Solicitação atualizada",
             content = @Content(mediaType = "application/json", schema = @Schema(implementation = com.empresa.dto.SolicitacaoDTO.class))),

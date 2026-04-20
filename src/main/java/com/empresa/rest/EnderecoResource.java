@@ -9,6 +9,7 @@ import org.eclipse.microprofile.openapi.annotations.parameters.Parameter;
 import org.eclipse.microprofile.openapi.annotations.parameters.RequestBody;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
+import org.eclipse.microprofile.openapi.annotations.security.SecurityRequirement;
 
 import com.empresa.dto.EnderecoDTO;
 import com.empresa.model.Endereco;
@@ -63,6 +64,7 @@ public class EnderecoResource {
 	@GET
 	@Operation(summary = "Lista todos os endereços", description = "Retorna todos os endereços cadastrados.")
 	@APIResponse(responseCode = "200", description = "Lista de endereços", content = @Content(schema = @Schema(implementation = Endereco.class)))
+    @SecurityRequirement(name = "jwt")
 	public List<Endereco> listarTodos() {
 		return enderecoService.listarTodos();
 	}
@@ -72,6 +74,7 @@ public class EnderecoResource {
 	@Operation(summary = "Busca endereço por ID", description = "Retorna um endereço pelo seu identificador.")
 	@APIResponse(responseCode = "200", description = "Endereço encontrado", content = @Content(schema = @Schema(implementation = Endereco.class)))
 	@APIResponse(responseCode = "404", description = "Endereço não encontrado")
+    @SecurityRequirement(name = "jwt")
 	public Response buscarPorId(
 		@Parameter(description = "ID do endereço", required = true)
 		@PathParam("id") Long id) {
@@ -86,6 +89,7 @@ public class EnderecoResource {
 	@Operation(summary = "Cria um novo endereço", description = "Cria um endereço no sistema a partir dos dados enviados.")
 	@APIResponse(responseCode = "201", description = "Endereço criado com sucesso", content = @Content(schema = @Schema(implementation = EnderecoDTO.class)))
 	@APIResponse(responseCode = "400", description = "Dados inválidos")
+    @SecurityRequirement(name = "jwt")
 	public Response criar(
 		@RequestBody(description = "Dados do novo endereço", required = true, content = @Content(schema = @Schema(implementation = Endereco.class)))
 		Endereco endereco) {
@@ -109,6 +113,7 @@ public class EnderecoResource {
 	@APIResponse(responseCode = "200", description = "Endereço atualizado", content = @Content(schema = @Schema(implementation = Endereco.class)))
 	@APIResponse(responseCode = "400", description = "Dados inválidos")
 	@APIResponse(responseCode = "404", description = "Endereço não encontrado")
+    @SecurityRequirement(name = "jwt")
 	public Response atualizar(
 		@Parameter(description = "ID do endereço a ser atualizado", required = true)
 		@PathParam("id") Long id,

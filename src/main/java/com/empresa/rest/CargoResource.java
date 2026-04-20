@@ -7,6 +7,7 @@ import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.eclipse.microprofile.openapi.annotations.media.Content;
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
+import org.eclipse.microprofile.openapi.annotations.security.SecurityRequirement;
 
 import java.util.List;
 
@@ -41,6 +42,7 @@ public class CargoResource {
     @GET
     @Operation(summary = "Lista todos os cargos", description = "Retorna todos os cargos cadastrados.")
     @APIResponse(responseCode = "200", description = "Lista de cargos", content = @Content(schema = @Schema(implementation = Cargo.class, description = "Lista de cargos")))
+    @SecurityRequirement(name = "jwt")
     public List<Cargo> listarTodos() {
         return cargoService.listarTodos();
     }
@@ -51,6 +53,7 @@ public class CargoResource {
     @Operation(summary = "Busca cargo por ID", description = "Retorna um cargo pelo seu identificador.")
     @APIResponse(responseCode = "200", description = "Cargo encontrado", content = @Content(schema = @Schema(implementation = Cargo.class)))
     @APIResponse(responseCode = "404", description = "Cargo não encontrado")
+    @SecurityRequirement(name = "jwt")
     public Response buscarPorId(
         @Parameter(description = "ID do cargo", required = true)
         @PathParam("id") Long id) {
@@ -66,6 +69,7 @@ public class CargoResource {
     @Operation(summary = "Cria um novo cargo", description = "Cria um cargo no sistema a partir dos dados enviados.")
     @APIResponse(responseCode = "201", description = "Cargo criado com sucesso", content = @Content(schema = @Schema(implementation = Cargo.class)))
     @APIResponse(responseCode = "400", description = "Dados inválidos")
+    @SecurityRequirement(name = "jwt")
     public Response criar(
         @RequestBody(description = "Dados do novo cargo", required = true, content = @Content(schema = @Schema(implementation = Cargo.class)))
         Cargo cargo) {
@@ -87,6 +91,7 @@ public class CargoResource {
     @APIResponse(responseCode = "200", description = "Cargo atualizado", content = @Content(schema = @Schema(implementation = Cargo.class)))
     @APIResponse(responseCode = "400", description = "Dados inválidos")
     @APIResponse(responseCode = "404", description = "Cargo não encontrado")
+    @SecurityRequirement(name = "jwt")
     public Response atualizar(
         @Parameter(description = "ID do cargo a ser atualizado", required = true)
         @PathParam("id") Long id,
@@ -112,6 +117,7 @@ public class CargoResource {
     @APIResponse(responseCode = "204", description = "Cargo removido com sucesso")
     @APIResponse(responseCode = "400", description = "Não pode ser removido")
     @APIResponse(responseCode = "404", description = "Cargo não encontrado")
+    @SecurityRequirement(name = "jwt")
     public Response deletar(
         @Parameter(description = "ID do cargo a ser removido", required = true)
         @PathParam("id") Long id) {
