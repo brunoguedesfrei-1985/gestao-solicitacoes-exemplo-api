@@ -2,6 +2,14 @@ package com.empresa.rest;
 
 import java.util.List;
 
+import org.eclipse.microprofile.openapi.annotations.Operation;
+import org.eclipse.microprofile.openapi.annotations.media.Content;
+import org.eclipse.microprofile.openapi.annotations.media.Schema;
+import org.eclipse.microprofile.openapi.annotations.parameters.Parameter;
+import org.eclipse.microprofile.openapi.annotations.parameters.RequestBody;
+import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
+import org.eclipse.microprofile.openapi.annotations.tags.Tag;
+
 import com.empresa.dto.EnderecoDTO;
 import com.empresa.model.Endereco;
 import com.empresa.service.EnderecoService;
@@ -22,6 +30,7 @@ import jakarta.ws.rs.core.Response;
 @Path("/enderecos")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
+@Tag(name = "Endereço", description = "Operações relacionadas a endereços")
 public class EnderecoResource {
 
 	@Inject
@@ -32,7 +41,13 @@ public class EnderecoResource {
 
 	@GET
 	@Path("/cep/{cep}")
-	public Response buscarPorCep(@PathParam("cep") String cep) {
+	@Operation(summary = "Busca endereço por CEP", description = "Consulta endereço externo pelo CEP informado.")
+	@APIResponse(responseCode = "200", description = "Endereço encontrado", content = @Content(schema = @Schema(implementation = EnderecoDTO.class)))
+	@APIResponse(responseCode = "400", description = "CEP inválido ou erro na consulta")
+	@APIResponse(responseCode = "404", description = "Endereço não encontrado")
+	public Response buscarPorCep(
+		@Parameter(description = "CEP para consulta", required = true, example = "01001000")
+		@PathParam("cep") String cep) {
 		try {
 			EnderecoDTO dto = enderecoService.buscarPorCep(cep);
 			if (dto == null) {
@@ -46,13 +61,20 @@ public class EnderecoResource {
 	}
 
 	@GET
+	@Operation(summary = "Lista todos os endereços", description = "Retorna todos os endereços cadastrados.")
+	@APIResponse(responseCode = "200", description = "Lista de endereços", content = @Content(schema = @Schema(implementation = Endereco.class)))
 	public List<Endereco> listarTodos() {
 		return enderecoService.listarTodos();
 	}
 
 	@GET
 	@Path("/{id}")
-	public Response buscarPorId(@PathParam("id") Long id) {
+	@Operation(summary = "Busca endereço por ID", description = "Retorna um endereço pelo seu identificador.")
+	@APIResponse(responseCode = "200", description = "Endereço encontrado", content = @Content(schema = @Schema(implementation = Endereco.class)))
+	@APIResponse(responseCode = "404", description = "Endereço não encontrado")
+	public Response buscarPorId(
+		@Parameter(description = "ID do endereço", required = true)
+		@PathParam("id") Long id) {
 		Endereco endereco = enderecoService.buscarPorId(id);
 		if (endereco == null) {
 			return Response.status(Response.Status.NOT_FOUND).build();
@@ -61,7 +83,12 @@ public class EnderecoResource {
 	}
 
 	@POST
-	public Response criar(Endereco endereco) {
+	@Operation(summary = "Cria um novo endereço", description = "Cria um endereço no sistema a partir dos dados enviados.")
+	@APIResponse(responseCode = "201", description = "Endereço criado com sucesso", content = @Content(schema = @Schema(implementation = EnderecoDTO.class)))
+	@APIResponse(responseCode = "400", description = "Dados inválidos")
+	public Response criar(
+		@RequestBody(description = "Dados do novo endereço", required = true, content = @Content(schema = @Schema(implementation = Endereco.class)))
+		Endereco endereco) {
 		try {
 			enderecoValidator.validarParaCriar(endereco);
 		} catch (IllegalArgumentException e) {
@@ -78,7 +105,15 @@ public class EnderecoResource {
 
 	@PUT
 	@Path("/{id}")
-	public Response atualizar(@PathParam("id") Long id, Endereco dados) {
+	@Operation(summary = "Atualiza um endereço", description = "Atualiza os dados de um endereço existente.")
+	@APIResponse(responseCode = "200", description = "Endereço atualizado", content = @Content(schema = @Schema(implementation = Endereco.class)))
+	@APIResponse(responseCode = "400", description = "Dados inválidos")
+	@APIResponse(responseCode = "404", description = "Endereço não encontrado")
+	public Response atualizar(
+		@Parameter(description = "ID do endereço a ser atualizado", required = true)
+		@PathParam("id") Long id,
+		@RequestBody(description = "Dados do endereço para atualização", required = true, content = @Content(schema = @Schema(implementation = Endereco.class)))
+		Endereco dados) {
 		try {
 			enderecoValidator.validarParaAtualizar(id, dados);
 		} catch (IllegalArgumentException e) {
@@ -94,7 +129,13 @@ public class EnderecoResource {
 
 	@DELETE
 	@Path("/{id}")
-	public Response deletar(@PathParam("id") Long id) {
+	@Operation(summary = "Deleta um endereço", description = "Remove um endereço pelo seu identificador.")
+	@APIResponse(responseCode = "204", description = "Endereço removido com sucesso")
+	@APIResponse(responseCode = "400", description = "Não pode ser removido")
+	@APIResponse(responseCode = "404", description = "Endereço não encontrado")
+	public Response deletar(
+		@Parameter(description = "ID do endereço a ser removido", required = true)
+		@PathParam("id") Long id) {
 		try {
 			enderecoValidator.validarParaDeletar(id);
 		} catch (IllegalArgumentException e) {

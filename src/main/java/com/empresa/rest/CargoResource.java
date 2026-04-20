@@ -1,5 +1,12 @@
 package com.empresa.rest;
 
+import org.eclipse.microprofile.openapi.annotations.Operation;
+import org.eclipse.microprofile.openapi.annotations.parameters.RequestBody;
+import org.eclipse.microprofile.openapi.annotations.parameters.Parameter;
+import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
+import org.eclipse.microprofile.openapi.annotations.media.Content;
+import org.eclipse.microprofile.openapi.annotations.media.Schema;
+import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 
 import java.util.List;
 
@@ -22,6 +29,7 @@ import jakarta.ws.rs.core.Response;
 @Path("/cargos")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
+@Tag(name = "Cargo", description = "Operações relacionadas a cargos/funções de usuários")
 public class CargoResource {
     
     @Inject
@@ -31,6 +39,8 @@ public class CargoResource {
     CargoValidator cargoValidator;
 
     @GET
+    @Operation(summary = "Lista todos os cargos", description = "Retorna todos os cargos cadastrados.")
+    @APIResponse(responseCode = "200", description = "Lista de cargos", content = @Content(schema = @Schema(implementation = Cargo.class, description = "Lista de cargos")))
     public List<Cargo> listarTodos() {
         return cargoService.listarTodos();
     }
@@ -38,7 +48,12 @@ public class CargoResource {
 
     @GET
     @Path("/{id}")
-    public Response buscarPorId(@PathParam("id") Long id) {
+    @Operation(summary = "Busca cargo por ID", description = "Retorna um cargo pelo seu identificador.")
+    @APIResponse(responseCode = "200", description = "Cargo encontrado", content = @Content(schema = @Schema(implementation = Cargo.class)))
+    @APIResponse(responseCode = "404", description = "Cargo não encontrado")
+    public Response buscarPorId(
+        @Parameter(description = "ID do cargo", required = true)
+        @PathParam("id") Long id) {
         Cargo cargo = cargoService.buscarPorId(id);
         if (cargo == null) {
             return Response.status(Response.Status.NOT_FOUND).build();
@@ -48,7 +63,12 @@ public class CargoResource {
 
 
     @POST
-    public Response criar(Cargo cargo) {
+    @Operation(summary = "Cria um novo cargo", description = "Cria um cargo no sistema a partir dos dados enviados.")
+    @APIResponse(responseCode = "201", description = "Cargo criado com sucesso", content = @Content(schema = @Schema(implementation = Cargo.class)))
+    @APIResponse(responseCode = "400", description = "Dados inválidos")
+    public Response criar(
+        @RequestBody(description = "Dados do novo cargo", required = true, content = @Content(schema = @Schema(implementation = Cargo.class)))
+        Cargo cargo) {
         try {
             cargoValidator.validarParaCriar(cargo);
         } catch (IllegalArgumentException e) {
@@ -63,7 +83,15 @@ public class CargoResource {
 
     @PUT
     @Path("/{id}")
-    public Response atualizar(@PathParam("id") Long id, Cargo dados) {
+    @Operation(summary = "Atualiza um cargo", description = "Atualiza os dados de um cargo existente.")
+    @APIResponse(responseCode = "200", description = "Cargo atualizado", content = @Content(schema = @Schema(implementation = Cargo.class)))
+    @APIResponse(responseCode = "400", description = "Dados inválidos")
+    @APIResponse(responseCode = "404", description = "Cargo não encontrado")
+    public Response atualizar(
+        @Parameter(description = "ID do cargo a ser atualizado", required = true)
+        @PathParam("id") Long id,
+        @RequestBody(description = "Dados do cargo para atualização", required = true, content = @Content(schema = @Schema(implementation = Cargo.class)))
+        Cargo dados) {
         try {
             cargoValidator.validarParaAtualizar(id, dados);
         } catch (IllegalArgumentException e) {
@@ -80,7 +108,13 @@ public class CargoResource {
 
     @DELETE
     @Path("/{id}")
-    public Response deletar(@PathParam("id") Long id) {
+    @Operation(summary = "Deleta um cargo", description = "Remove um cargo pelo seu identificador.")
+    @APIResponse(responseCode = "204", description = "Cargo removido com sucesso")
+    @APIResponse(responseCode = "400", description = "Não pode ser removido")
+    @APIResponse(responseCode = "404", description = "Cargo não encontrado")
+    public Response deletar(
+        @Parameter(description = "ID do cargo a ser removido", required = true)
+        @PathParam("id") Long id) {
         try {
             cargoValidator.validarParaDeletar(id);
         } catch (IllegalArgumentException e) {

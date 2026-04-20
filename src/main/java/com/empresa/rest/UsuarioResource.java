@@ -3,6 +3,12 @@ package com.empresa.rest;
 
 import java.util.List;
 
+import org.eclipse.microprofile.openapi.annotations.Operation;
+import org.eclipse.microprofile.openapi.annotations.media.Content;
+import org.eclipse.microprofile.openapi.annotations.media.Schema;
+import org.eclipse.microprofile.openapi.annotations.parameters.Parameter;
+import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
+import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 import org.jboss.logging.Logger;
 
 import com.empresa.dto.UsuarioDTO;
@@ -22,6 +28,7 @@ import jakarta.ws.rs.core.Response;
 @Path("/usuarios")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
+@Tag(name = "Usuário", description = "Operações relacionadas a usuários do sistema")
 public class UsuarioResource {
 	
 	private static final Logger LOG = Logger.getLogger(UsuarioResource.class);
@@ -33,6 +40,8 @@ public class UsuarioResource {
     UsuarioService usuarioService;
 
     @GET
+    @Operation(summary = "Lista todos os usuários", description = "Retorna todos os usuários cadastrados.")
+    @APIResponse(responseCode = "200", description = "Lista de usuários", content = @Content(schema = @Schema(implementation = UsuarioDTO.class)))
     public List<UsuarioDTO> listarTodos() {
         LOG.info("Listando todos os usuários");
         return usuarioService.listarTodos();
@@ -40,7 +49,12 @@ public class UsuarioResource {
 
     @GET
     @Path("/{id}")
-    public Response buscarPorId(@PathParam("id") Long id) {
+    @Operation(summary = "Busca usuário por ID", description = "Retorna um usuário pelo seu identificador.")
+    @APIResponse(responseCode = "200", description = "Usuário encontrado", content = @Content(schema = @Schema(implementation = UsuarioDTO.class)))
+    @APIResponse(responseCode = "404", description = "Usuário não encontrado")
+    public Response buscarPorId(
+        @Parameter(description = "ID do usuário", required = true)
+        @PathParam("id") Long id) {
         LOG.infof("Buscando usuário por id %d", id);
         UsuarioDTO usuario = usuarioService.buscarPorId(id);
         if (usuario == null) {
@@ -54,7 +68,13 @@ public class UsuarioResource {
 
     @DELETE
     @Path("/{id}")
-    public Response deletar(@PathParam("id") Long id) {
+    @Operation(summary = "Deleta um usuário", description = "Remove um usuário pelo seu identificador.")
+    @APIResponse(responseCode = "204", description = "Usuário removido com sucesso")
+    @APIResponse(responseCode = "400", description = "Não pode ser removido")
+    @APIResponse(responseCode = "404", description = "Usuário não encontrado")
+    public Response deletar(
+        @Parameter(description = "ID do usuário a ser removido", required = true)
+        @PathParam("id") Long id) {
         LOG.infof("Deletando usuário id %d", id);
         try {
             usuarioValidator.validarParaDeletar(id);

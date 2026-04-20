@@ -80,7 +80,27 @@
 # You can find more information about the UBI base runtime images and their configuration here:
 # https://rh-openjdk.github.io/redhat-openjdk-containers/
 ###
-FROM registry.access.redhat.com/ubi8/openjdk-21:1.23
+
+# Exemplo usando imagem base openjdk:21-slim
+FROM openjdk:21-slim
+
+# Instala certificados raiz (já vem por padrão, mas garantimos atualização)
+RUN apt-get update && apt-get install -y ca-certificates && rm -rf /var/lib/apt/lists/*
+
+ENV LANGUAGE='en_US:en'
+
+# Copia os artefatos da aplicação
+COPY --chown=1000:1000 target/quarkus-app/lib/ /deployments/lib/
+COPY --chown=1000:1000 target/quarkus-app/*.jar /deployments/
+COPY --chown=1000:1000 target/quarkus-app/app/ /deployments/app/
+COPY --chown=1000:1000 target/quarkus-app/quarkus/ /deployments/quarkus/
+
+EXPOSE 8080
+USER 1000
+ENV JAVA_OPTS_APPEND="-Dquarkus.http.host=0.0.0.0 -Djava.util.logging.manager=org.jboss.logmanager.LogManager"
+ENV JAVA_APP_JAR="/deployments/quarkus-run.jar"
+
+ENTRYPOINT [ "java", "-jar", "/deployments/quarkus-run.jar" ]
 
 ENV LANGUAGE='en_US:en'
 

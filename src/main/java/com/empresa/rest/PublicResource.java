@@ -3,6 +3,12 @@ package com.empresa.rest;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.eclipse.microprofile.openapi.annotations.Operation;
+import org.eclipse.microprofile.openapi.annotations.media.Content;
+import org.eclipse.microprofile.openapi.annotations.media.Schema;
+import org.eclipse.microprofile.openapi.annotations.parameters.RequestBody;
+import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
+import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 import org.jboss.logging.Logger;
 
 import com.empresa.auth.JwtUtil;
@@ -28,6 +34,7 @@ import jakarta.ws.rs.core.Response;
 @Path("/public")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
+@Tag(name = "Public", description = "Operações públicas disponíveis sem autenticação")
 public class PublicResource {
 
     private static final Logger LOG = Logger.getLogger(PublicResource.class);
@@ -44,6 +51,8 @@ public class PublicResource {
     /**
      * Endpoint público para listar cargos disponíveis
      */
+    @Operation(summary = "Lista cargos disponíveis", description = "Retorna todos os cargos públicos cadastrados.")
+    @APIResponse(responseCode = "200", description = "Lista de cargos", content = @Content(schema = @Schema(implementation = CargoDTO.class)))
     @GET
     @Path("/cargos")
     public List<CargoDTO> listarCargosPublico() {
@@ -56,9 +65,14 @@ public class PublicResource {
         return cargos;
     }
 
+    @Operation(summary = "Cria um novo usuário", description = "Cria um usuário no sistema a partir dos dados enviados.")
+    @APIResponse(responseCode = "201", description = "Usuário criado com sucesso", content = @Content(schema = @Schema(implementation = UsuarioDTO.class)))
+    @APIResponse(responseCode = "400", description = "Dados inválidos")
+    @APIResponse(responseCode = "409", description = "Usuário já existe")
     @POST
     @Path("/usuarios")
-    public Response criarUsuario(UsuarioRequest usuarioRequest) {
+    public Response criarUsuario(
+        @RequestBody(description = "Dados do novo usuário", required = true, content = @Content(schema = @Schema(implementation = UsuarioRequest.class))) UsuarioRequest usuarioRequest) {
         LOG.infof("{\"event\":\"criarUsuario\",\"email\":\"%s\",\"status\":\"inicio\"}", usuarioRequest.email);
         try {
             usuarioValidator.validarParaCriar(usuarioRequest);
@@ -78,9 +92,13 @@ public class PublicResource {
         }
     }
 
+    @Operation(summary = "Autentica usuário e retorna token JWT", description = "Realiza login e retorna um token JWT válido para autenticação.")
+    @APIResponse(responseCode = "200", description = "Login realizado com sucesso", content = @Content(schema = @Schema(implementation = TokenResponse.class)))
+    @APIResponse(responseCode = "401", description = "Credenciais inválidas")
     @POST
     @Path("/login")
-    public Response login(LoginRequest login) {
+    public Response login(
+        @RequestBody(description = "Credenciais de login", required = true, content = @Content(schema = @Schema(implementation = LoginRequest.class))) LoginRequest login) {
         LOG.infof("{\"event\":\"login\",\"email\":\"%s\",\"status\":\"inicio\"}", login.getEmail());
         UsuarioDTO usuario = usuarioService.autenticar(login.getEmail(), login.getSenha());
         if (usuario != null) {

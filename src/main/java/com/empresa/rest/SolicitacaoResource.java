@@ -1,9 +1,18 @@
 package com.empresa.rest;
 
 
+
 import java.util.List;
 
 import org.eclipse.microprofile.metrics.annotation.Counted;
+import org.eclipse.microprofile.openapi.annotations.Operation;
+import org.eclipse.microprofile.openapi.annotations.media.Content;
+import org.eclipse.microprofile.openapi.annotations.media.Schema;
+import org.eclipse.microprofile.openapi.annotations.parameters.Parameter;
+import org.eclipse.microprofile.openapi.annotations.parameters.RequestBody;
+import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
+import org.eclipse.microprofile.openapi.annotations.responses.APIResponses;
+import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 import org.jboss.logging.Logger;
 
 import com.empresa.domain.SolicitacaoRequest;
@@ -31,6 +40,7 @@ import jakarta.ws.rs.core.SecurityContext;
 @Path("/solicitacoes")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
+@Tag(name = "Solicitações", description = "Gerenciamento de solicitações")
 public class SolicitacaoResource {
     @Inject
     SolicitacaoValidator solicitacaoValidator;
@@ -46,9 +56,16 @@ public class SolicitacaoResource {
     @GET
     @Path("/todas/demandante")
     @Counted(name = "solicitacoes_listar_todas_demandante_count", description = "Contador de chamadas ao endpoint de listagem de solicitações por demandante")
+    @Operation(summary = "Listar solicitações do demandante logado", description = "Retorna todas as solicitações do usuário demandante logado, paginadas.")
+    @APIResponses(value = {
+        @APIResponse(responseCode = "200", description = "Lista de solicitações retornada com sucesso",
+            content = @Content(mediaType = "application/json")),
+        @APIResponse(responseCode = "401", description = "Usuário não autenticado"),
+        @APIResponse(responseCode = "500", description = "Erro interno do servidor")
+    })
     public Response listarTodas(
-        @QueryParam("page") @DefaultValue("0") int page,
-        @QueryParam("size") @DefaultValue("10") int size
+        @Parameter(description = "Página de resultados", example = "0") @QueryParam("page") @DefaultValue("0") int page,
+        @Parameter(description = "Tamanho da página", example = "10") @QueryParam("size") @DefaultValue("10") int size
     ) {
         validateSecurityContext();
         String email = securityContext.getUserPrincipal().getName();
@@ -64,9 +81,16 @@ public class SolicitacaoResource {
     @GET
     @Path("/todas/atendente")
     @Counted(name = "solicitacoes_listar_todas_atendente_count", description = "Contador de chamadas ao endpoint de listagem de solicitações por atendente")
+    @Operation(summary = "Listar solicitações do atendente logado", description = "Retorna todas as solicitações do usuário atendente logado, paginadas.")
+    @APIResponses(value = {
+        @APIResponse(responseCode = "200", description = "Lista de solicitações retornada com sucesso",
+            content = @Content(mediaType = "application/json")),
+        @APIResponse(responseCode = "401", description = "Usuário não autenticado"),
+        @APIResponse(responseCode = "500", description = "Erro interno do servidor")
+    })
     public Response listarTodasUsuarioAtendente(
-            @QueryParam("page") @DefaultValue("0") int page,
-            @QueryParam("size") @DefaultValue("10") int size
+            @Parameter(description = "Página de resultados", example = "0") @QueryParam("page") @DefaultValue("0") int page,
+            @Parameter(description = "Tamanho da página", example = "10") @QueryParam("size") @DefaultValue("10") int size
         ) {
         validateSecurityContext();
         String email = securityContext.getUserPrincipal().getName();
@@ -88,7 +112,15 @@ public class SolicitacaoResource {
 
     @GET
     @Path("/demandante/{id}")
-    public Response buscarPorIdDemandante(@PathParam("id") Long id) {
+    @Operation(summary = "Buscar solicitação por id (demandante)", description = "Busca uma solicitação pelo id para o usuário demandante logado.")
+    @APIResponses(value = {
+        @APIResponse(responseCode = "200", description = "Solicitação encontrada",
+            content = @Content(mediaType = "application/json", schema = @Schema(implementation = com.empresa.dto.SolicitacaoDTO.class))),
+        @APIResponse(responseCode = "403", description = "Acesso negado"),
+        @APIResponse(responseCode = "404", description = "Solicitação não encontrada")
+    })
+    public Response buscarPorIdDemandante(
+        @Parameter(description = "ID da solicitação", example = "1") @PathParam("id") Long id) {
         validateSecurityContext();
         String email = securityContext.getUserPrincipal().getName();
         Solicitacao s = solicitacaoService.buscarPorId(id);
@@ -103,7 +135,15 @@ public class SolicitacaoResource {
 
     @GET
     @Path("/atendente/{id}")
-    public Response buscarPorIdAtendente(@PathParam("id") Long id) {
+    @Operation(summary = "Buscar solicitação por id (atendente)", description = "Busca uma solicitação pelo id para o usuário atendente logado.")
+    @APIResponses(value = {
+        @APIResponse(responseCode = "200", description = "Solicitação encontrada",
+            content = @Content(mediaType = "application/json", schema = @Schema(implementation = com.empresa.dto.SolicitacaoDTO.class))),
+        @APIResponse(responseCode = "403", description = "Acesso negado"),
+        @APIResponse(responseCode = "404", description = "Solicitação não encontrada")
+    })
+    public Response buscarPorIdAtendente(
+        @Parameter(description = "ID da solicitação", example = "1") @PathParam("id") Long id) {
         validateSecurityContext();
         String email = securityContext.getUserPrincipal().getName();
         Solicitacao s = solicitacaoService.buscarPorId(id);
@@ -117,7 +157,16 @@ public class SolicitacaoResource {
     }
 
     @POST
-    public Response criar(SolicitacaoRequest req) {
+    @Operation(summary = "Criar nova solicitação", description = "Cria uma nova solicitação.")
+    @APIResponses(value = {
+        @APIResponse(responseCode = "201", description = "Solicitação criada",
+            content = @Content(mediaType = "application/json", schema = @Schema(implementation = com.empresa.dto.SolicitacaoDTO.class))),
+        @APIResponse(responseCode = "400", description = "Dados inválidos"),
+        @APIResponse(responseCode = "500", description = "Erro interno do servidor")
+    })
+    public Response criar(
+        @RequestBody(description = "Dados para criação da solicitação", required = true,
+            content = @Content(schema = @Schema(implementation = com.empresa.domain.SolicitacaoRequest.class))) SolicitacaoRequest req) {
         try {
             solicitacaoValidator.validarParaCriar(req);
         } catch (IllegalArgumentException e) {
@@ -136,7 +185,18 @@ public class SolicitacaoResource {
 
     @PUT
     @Path("/demandante/{id}")
-    public Response atualizarDemandante(@PathParam("id") Long id, Solicitacao dados) {
+    @Operation(summary = "Atualizar solicitação (demandante)", description = "Atualiza uma solicitação como demandante.")
+    @APIResponses(value = {
+        @APIResponse(responseCode = "200", description = "Solicitação atualizada",
+            content = @Content(mediaType = "application/json", schema = @Schema(implementation = com.empresa.dto.SolicitacaoDTO.class))),
+        @APIResponse(responseCode = "400", description = "Dados inválidos"),
+        @APIResponse(responseCode = "403", description = "Acesso negado"),
+        @APIResponse(responseCode = "404", description = "Solicitação não encontrada")
+    })
+    public Response atualizarDemandante(
+        @Parameter(description = "ID da solicitação", example = "1") @PathParam("id") Long id,
+        @RequestBody(description = "Dados para atualização da solicitação", required = true,
+            content = @Content(schema = @Schema(implementation = com.empresa.model.Solicitacao.class))) Solicitacao dados) {
         validateSecurityContext();
         String email = securityContext.getUserPrincipal().getName();
         Solicitacao s = solicitacaoService.buscarPorId(id);
@@ -160,7 +220,18 @@ public class SolicitacaoResource {
 
     @PUT
     @Path("/atendente/{id}")
-    public Response atualizarAtendente(@PathParam("id") Long id, Solicitacao dados) {
+    @Operation(summary = "Atualizar solicitação (atendente)", description = "Atualiza uma solicitação como atendente.")
+    @APIResponses(value = {
+        @APIResponse(responseCode = "200", description = "Solicitação atualizada",
+            content = @Content(mediaType = "application/json", schema = @Schema(implementation = com.empresa.dto.SolicitacaoDTO.class))),
+        @APIResponse(responseCode = "400", description = "Dados inválidos"),
+        @APIResponse(responseCode = "403", description = "Acesso negado"),
+        @APIResponse(responseCode = "404", description = "Solicitação não encontrada")
+    })
+    public Response atualizarAtendente(
+        @Parameter(description = "ID da solicitação", example = "1") @PathParam("id") Long id,
+        @RequestBody(description = "Dados para atualização da solicitação", required = true,
+            content = @Content(schema = @Schema(implementation = com.empresa.model.Solicitacao.class))) Solicitacao dados) {
         validateSecurityContext();
         String email = securityContext.getUserPrincipal().getName();
         Solicitacao s = solicitacaoService.buscarPorId(id);
