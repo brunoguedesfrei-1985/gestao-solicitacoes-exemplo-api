@@ -5,7 +5,7 @@ import java.util.List;
 
 import org.jboss.logging.Logger;
 
-import com.empresa.model.Usuario;
+import com.empresa.dto.UsuarioDTO;
 import com.empresa.service.UsuarioService;
 
 import jakarta.inject.Inject;
@@ -29,7 +29,7 @@ public class UsuarioResource {
     UsuarioService usuarioService;
 
     @GET
-    public List<Usuario> listarTodos() {
+    public List<UsuarioDTO> listarTodos() {
         LOG.info("Listando todos os usuários");
         return usuarioService.listarTodos();
     }
@@ -38,7 +38,7 @@ public class UsuarioResource {
     @Path("/{id}")
     public Response buscarPorId(@PathParam("id") Long id) {
         LOG.infof("Buscando usuário por id %d", id);
-        Usuario usuario = usuarioService.buscarPorId(id);
+        UsuarioDTO usuario = usuarioService.buscarPorId(id);
         if (usuario == null) {
             LOG.warnf("Usuário id %d não encontrado", id);
             return Response.status(Response.Status.NOT_FOUND).build();

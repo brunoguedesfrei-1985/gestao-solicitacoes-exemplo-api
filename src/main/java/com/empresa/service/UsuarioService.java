@@ -25,12 +25,15 @@ public class UsuarioService {
     @Inject
     CpfValidatorService cpfValidatorService;
 
-    public List<Usuario> listarTodos() {
-        return usuarioDAO.listarTodos();
+    public List<UsuarioDTO> listarTodos() {
+        return usuarioDAO.listarTodos().stream()
+                .map(UsuarioMapper::toDTO)
+                .toList();
     }
 
-    public Usuario buscarPorId(Long id) {
-        return usuarioDAO.buscarPorId(id);
+    public UsuarioDTO buscarPorId(Long id) {
+        Usuario usuario = usuarioDAO.buscarPorId(id);
+        return usuario != null ? UsuarioMapper.toDTO(usuario) : null;
     }
 
     @Transactional
