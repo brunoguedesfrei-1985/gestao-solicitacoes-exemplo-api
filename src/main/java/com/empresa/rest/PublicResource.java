@@ -14,6 +14,7 @@ import com.empresa.dto.ResponseLoginDTO;
 import com.empresa.dto.UsuarioDTO;
 import com.empresa.service.CargoService;
 import com.empresa.service.UsuarioService;
+import com.empresa.validator.UsuarioValidator;
 
 import jakarta.inject.Inject;
 import jakarta.ws.rs.Consumes;
@@ -30,6 +31,9 @@ import jakarta.ws.rs.core.Response;
 public class PublicResource {
 
     private static final Logger LOG = Logger.getLogger(PublicResource.class);
+    
+    @Inject
+    UsuarioValidator usuarioValidator;
 
     @Inject
     UsuarioService usuarioService;
@@ -56,6 +60,14 @@ public class PublicResource {
     @Path("/usuarios")
     public Response criarUsuario(UsuarioRequest usuarioRequest) {
         LOG.infof("{\"event\":\"criarUsuario\",\"email\":\"%s\",\"status\":\"inicio\"}", usuarioRequest.email);
+        try {
+            usuarioValidator.validarParaCriar(usuarioRequest);
+        } catch (IllegalArgumentException e) {
+            LOG.errorf("{\"event\":\"criarUsuario\",\"email\":\"%s\",\"status\":\"erro\",\"mensagem\":\"%s\"}", usuarioRequest.email, e.getMessage());
+            return Response.status(Response.Status.BAD_REQUEST)
+                .entity(java.util.Collections.singletonMap("erro", e.getMessage()))
+                .build();
+        }
         try {
             UsuarioDTO novoUsuario = usuarioService.criar(usuarioRequest);
             LOG.infof("{\"event\":\"criarUsuario\",\"email\":\"%s\",\"status\":\"sucesso\",\"usuarioId\":%s}", usuarioRequest.email, novoUsuario.id);

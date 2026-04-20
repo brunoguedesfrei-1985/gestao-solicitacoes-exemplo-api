@@ -7,6 +7,7 @@ import org.jboss.logging.Logger;
 
 import com.empresa.dto.UsuarioDTO;
 import com.empresa.service.UsuarioService;
+import com.empresa.validator.UsuarioValidator;
 
 import jakarta.inject.Inject;
 import jakarta.ws.rs.Consumes;
@@ -24,6 +25,9 @@ import jakarta.ws.rs.core.Response;
 public class UsuarioResource {
 	
 	private static final Logger LOG = Logger.getLogger(UsuarioResource.class);
+	
+	@Inject
+	UsuarioValidator usuarioValidator;
 
     @Inject
     UsuarioService usuarioService;
@@ -52,6 +56,13 @@ public class UsuarioResource {
     @Path("/{id}")
     public Response deletar(@PathParam("id") Long id) {
         LOG.infof("Deletando usuário id %d", id);
+        try {
+            usuarioValidator.validarParaDeletar(id);
+        } catch (IllegalArgumentException e) {
+            return Response.status(Response.Status.BAD_REQUEST)
+                .entity(java.util.Collections.singletonMap("erro", e.getMessage()))
+                .build();
+        }
         boolean removido = usuarioService.deletar(id);
         if (removido) {
             LOG.infof("Usuário id %d deletado", id);

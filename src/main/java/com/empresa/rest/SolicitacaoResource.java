@@ -10,6 +10,7 @@ import com.empresa.dto.SolicitacaoDTO;
 import com.empresa.mapper.SolicitacaoMapper;
 import com.empresa.model.Solicitacao;
 import com.empresa.service.SolicitacaoService;
+import com.empresa.validator.SolicitacaoValidator;
 
 import jakarta.inject.Inject;
 import jakarta.ws.rs.Consumes;
@@ -30,6 +31,8 @@ import jakarta.ws.rs.core.SecurityContext;
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 public class SolicitacaoResource {
+    @Inject
+    SolicitacaoValidator solicitacaoValidator;
 
 	private static final Logger LOG = Logger.getLogger(SolicitacaoResource.class);
 
@@ -113,6 +116,13 @@ public class SolicitacaoResource {
     @POST
     public Response criar(SolicitacaoRequest req) {
         try {
+            solicitacaoValidator.validarParaCriar(req);
+        } catch (IllegalArgumentException e) {
+            return Response.status(Response.Status.BAD_REQUEST)
+                .entity(java.util.Collections.singletonMap("erro", e.getMessage()))
+                .build();
+        }
+        try {
             SolicitacaoDTO nova = solicitacaoService.criar(req);
             return Response.status(Response.Status.CREATED).entity(nova).build();
         } catch (Exception e) {
@@ -134,6 +144,13 @@ public class SolicitacaoResource {
         if (s.usuarioAtribuido == null || !email.equals(s.usuarioAtribuido.email)) {
             return Response.status(Response.Status.FORBIDDEN).entity("Acesso negado à atualização para demandante").build();
         }
+        try {
+            solicitacaoValidator.validarParaAtualizar(id, dados);
+        } catch (IllegalArgumentException e) {
+            return Response.status(Response.Status.BAD_REQUEST)
+                .entity(java.util.Collections.singletonMap("erro", e.getMessage()))
+                .build();
+        }
         SolicitacaoDTO solicitacao = solicitacaoService.atualizar(id, dados);
         return Response.ok(solicitacao).build();
     }
@@ -150,6 +167,13 @@ public class SolicitacaoResource {
         }
         if (s.usuarioAtendente == null || !email.equals(s.usuarioAtendente.email)) {
             return Response.status(Response.Status.FORBIDDEN).entity("Acesso negado à atualização para atendente").build();
+        }
+        try {
+            solicitacaoValidator.validarParaAtualizar(id, dados);
+        } catch (IllegalArgumentException e) {
+            return Response.status(Response.Status.BAD_REQUEST)
+                .entity(java.util.Collections.singletonMap("erro", e.getMessage()))
+                .build();
         }
         SolicitacaoDTO solicitacao = solicitacaoService.atualizar(id, dados);
         return Response.ok(solicitacao).build();
