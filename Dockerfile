@@ -1,8 +1,21 @@
-FROM eclipse-temurin:21-jre
-WORKDIR /work/
-COPY target/quarkus-app/lib/ /work/lib/
-COPY target/quarkus-app/*.jar /work/
-COPY target/quarkus-app/app/ /work/app/
-COPY target/quarkus-app/quarkus/ /work/quarkus/
+FROM maven:3.9-eclipse-temurin-21 AS builder
+
+WORKDIR /app
+
+COPY pom.xml .
+COPY src ./src
+
+RUN mvn clean package -DskipTests
+
+FROM eclipse-temurin:21-jre-alpine
+
+WORKDIR /app
+
+COPY --from=builder /app/target/quarkus-app/lib/ ./lib/
+COPY --from=builder /app/target/quarkus-app/*.jar ./
+COPY --from=builder /app/target/quarkus-app/app/ ./app/
+COPY --from=builder /app/target/quarkus-app/quarkus/ ./quarkus/
+
 EXPOSE 8080
-CMD ["java", "-Dquarkus.http.port=8080", "-jar", "quarkus-run.jar"]
+
+CMD ["java", "-jar", "quarkus-run.jar"]
