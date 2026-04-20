@@ -10,13 +10,13 @@ public class Usuario extends PanacheEntity {
     @Column(nullable = false, unique = true, length = 14)
     public String cpf;
     
-    @Column(nullable = false)
+    @Column(nullable = false, length = 255)
     public String nome;
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false, unique = true, length = 255)
     public String email;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 255)
     public String senha;
 
     @ManyToOne
@@ -27,13 +27,4 @@ public class Usuario extends PanacheEntity {
     @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, orphanRemoval = true)
     public List<Endereco> enderecos;
 
-//    // Relacionamentos com solicitações
-//    @OneToMany(mappedBy = "usuarioAtribuido")
-//    public List<Solicitacao> chamadosAtribuidos;
-//
-//    @OneToMany(mappedBy = "usuarioAprovador")
-//    public List<Solicitacao> chamadosParaAprovar;
-//
-//    @OneToMany(mappedBy = "usuarioAtendente")
-//    public List<Solicitacao> chamadosParaAtender;
 }

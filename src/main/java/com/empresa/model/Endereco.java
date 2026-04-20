@@ -6,10 +6,10 @@ import jakarta.persistence.*;
 @Entity
 public class Endereco extends PanacheEntity {
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 255)
     public String endereco;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 20)
     public String cep;
 
     @ManyToOne

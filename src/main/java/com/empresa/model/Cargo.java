@@ -7,7 +7,7 @@ import java.util.List;
 @Entity
 public class Cargo extends PanacheEntity {
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false, unique = true, length = 255)
     public String nome;
 
     // Relacionamento reverso com usuarios (opcional, mas útil para queries)
