@@ -86,8 +86,8 @@ docker-compose down
 ```
 
 ## Documentação da API
-- Swagger UI: [http://localhost:8090/q/swagger-ui](http://localhost:8090/q/swagger-ui)
-- OpenAPI JSON: [http://localhost:8090/openapi](http://localhost:8090/openapi)
+- Swagger UI: [http://localhost:8090/doc](http://localhost:8090/doc)
+- OpenAPI JSON: [http://localhost:8090/q/openapi](http://localhost:8090/q/openapi)
 
 ## Autenticação
 A maioria dos endpoints exige autenticação JWT. Use o endpoint `/public/login` para obter um token e utilize o botão "Authorize" no Swagger UI para autenticar.
